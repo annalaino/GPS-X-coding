@@ -14,7 +14,7 @@ Bodp = 0.7
 Codut = 250
 Codlt = 125
 Codp = 0.75
-#adding 1 since it is otherwise between 0 and 49.95
+
 bodi = ["BOD1"]
 codi = ["COD1"] 
 bod = ["BOD31"]
@@ -42,7 +42,7 @@ def start():
 # cint() function executed at every communication interval
 #
 def cint():
-    global bod,cod,c_bod,c_cod,ts,bodi,codi,compliance_bod,compliance_cod
+    global bod,cod,c_bod,c_cod,ts,bodi,codi,compliance
     try:
         #store the time
         a = round(gpsx.getValue("t"),2)
@@ -57,20 +57,19 @@ def cint():
         c_bod.append(min(Bodut-gpsx.getValue("bod31"), max(Bodlt - gpsx.getValue("bod31"), Bodp*gpsx.getValue("bod1")-gpsx.getValue("bod1")+gpsx.getValue("bod31"))))
         c_cod.append(min(Codut-gpsx.getValue("cod31"), max(Codlt - gpsx.getValue("cod31"), Codp*gpsx.getValue("cod1")-gpsx.getValue("cod1")+gpsx.getValue("cod31"))))
         #MCL failure or LUT failure
-
         if (Bodlt - gpsx.getValue("bod31")<0) and (Bodut - gpsx.getValue("bod31")>0) and (((gpsx.getValue("bod1")-gpsx.getValue("bod31"))/gpsx.getValue("bod1"))<0.7):
-          compliance_bod.append("LUT failure")
+          return compliance_bod.append("LUT failure")
         elif (Bodut - gpsx.getValue("bod31")<0) and (((gpsx.getValue("bod1")-gpsx.getValue("bod31"))/gpsx.getValue("bod1"))<0.7):
-          compliance_bod.append ("MCL failure")
+          return compliance_bod.append ("MCL failure")
         else:
-          compliance_bod.append ("Compliant")  
-
+          return compliance_bod.append ("Compliant")
+          
         if (Codlt - gpsx.getValue("cod31")<0) and (Codut - gpsx.getValue("cod31")>0) and (((gpsx.getValue("cod1")-gpsx.getValue("cod31"))/gpsx.getValue("cod1"))<0.7):
-          compliance_cod.append("LUT failure")
+          return compliance_cod.append("LUT failure")
         elif (Codut - gpsx.getValue("cod31")<0) and (((gpsx.getValue("cod1")-gpsx.getValue("cod31"))/gpsx.getValue("cod1"))<0.7):
-          compliance_cod.append ("MCL failure")
+          return compliance_cod.append ("MCL failure")
         else:
-          compliance_cod.append ("Compliant")
+          return compliance_cod.append ("Compliant")
         
     except Exception as e:
         print(e)
@@ -100,9 +99,9 @@ try:
     print(cod)
     #print(c)
 
-    fields=["TIME","BOD31","COD31","BOD1","COD1","c_bod","c_cod", "Compliance BOD","Compliance COD"]
-    rows= [ts,bod,cod,bodi,codi,c_bod,c_cod,compliance_bod,compliance_cod]
-    with open('data12.csv', 'w', newline='') as file:
+    fields=["TIME","BOD31","COD31","BOD1","COD1","c_bod","c_cod"]
+    rows= [ts,bod,cod,bodi,codi,bod_c,cod_c]
+    with open('data.csv', 'w', newline='') as file:
         writer = csv.writer(file)
         #writer.writerow(fields)
         writer.writerows(rows)
